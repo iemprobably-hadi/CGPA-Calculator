@@ -67,8 +67,15 @@
   <!-- ═══════════════════ SEMESTERS CONTAINER ═══════════════════ -->
   <div id="semestersContainer"></div>
 
+  <!-- ═══════════════════ CALCULATE BUTTON ═══════════════════ -->
+  <div style="text-align: center; margin: 3rem 0;">
+    <button class="btn btn-primary" id="calculateFinalBtn" style="font-size: 1.25rem; padding: 1rem 2.5rem; border-radius: 50px; box-shadow: var(--shadow-lg);">
+      Calculate Final Results
+    </button>
+  </div>
+
   <!-- ═══════════════════ OVERALL CGPA PANEL ═══════════════════ -->
-  <section class="overall-panel" id="overallPanel">
+  <section class="overall-panel hidden" id="overallPanel">
     <div class="op-header">
       <div>
         <div class="op-eyebrow">Academic Summary</div>
@@ -101,6 +108,10 @@
       <div class="cgpa-stats">
         <div class="stat-card" id="statGrade">
           <div class="sc-label">Overall Grade</div>
+          <div class="sc-val">—</div>
+        </div>
+        <div class="stat-card" id="statHonors">
+          <div class="sc-label">Academic Honors</div>
           <div class="sc-val">—</div>
         </div>
         <div class="stat-card" id="statCH">

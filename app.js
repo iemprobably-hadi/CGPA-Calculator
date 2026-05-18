@@ -7,7 +7,6 @@ const NAME_KEY = 'gradex_studentName';
 const ARID_KEY = 'gradex_aridNo';
 
 let semData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-let hasCelebrated = false;
 
 const studentNameEl = document.getElementById('studentName');
 const aridNoEl = document.getElementById('aridNo');
@@ -61,6 +60,14 @@ function computeQP(rawMarks, ch) {
   return gpa * parseFloat(ch);
 }
 
+function getLatinHonors(cgpa) {
+  if (cgpa >= 3.90) return 'Summa Cum Laude';
+  if (cgpa >= 3.70) return 'Magna Cum Laude';
+  if (cgpa >= 3.50) return 'Cum Laude';
+  if (cgpa >= 3.00) return "Dean's List";
+  return 'Standard Standing';
+}
+
 function gradeLabel(gpa) {
   if (gpa >= 3.94) return { letter: 'A', msg: 'Outstanding Performance' };
   if (gpa >= 3.0) return { letter: 'B', msg: 'Excellent Work' };
@@ -95,6 +102,25 @@ document.addEventListener('DOMContentLoaded', () => {
     saveData();
     renderAll();
     scrollToSem(semData[semData.length - 1].id);
+  });
+
+  document.getElementById('calculateFinalBtn').addEventListener('click', () => {
+    const panel = document.getElementById('overallPanel');
+    panel.classList.remove('hidden');
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    
+    updateOverall();
+    
+    let totalCH = 0, totalQP = 0;
+    semData.forEach(sem => sem.subs.forEach(s => {
+      const ch = parseFloat(s.ch);
+      if (!isNaN(ch) && s.marks) { totalCH += ch; totalQP += computeQP(s.marks, s.ch); }
+    }));
+    const cgpa = totalCH ? (totalQP / totalCH) : 0;
+    
+    if (cgpa >= 3.5 && totalCH > 0) {
+      setTimeout(() => triggerConfetti(), 600); // Wait for scroll to finish
+    }
   });
 });
 
@@ -351,18 +377,16 @@ function updateOverall() {
     <span style="display:block; font-family:var(--font-body); font-size:0.85rem; color:var(--text2); letter-spacing:-0.01em; margin-top:2px;">${gl.msg}</span>
   `;
   
+  const honors = totalCH ? getLatinHonors(cgpa) : '—';
+  document.getElementById('statHonors').querySelector('.sc-val').innerHTML = `
+    ${honors}
+  `;
+  
   const ringCgpaEl = document.getElementById('overallCgpa');
   const ringFg = document.getElementById('cgpaRing');
   
   ringCgpaEl.textContent = totalCH ? cgpa.toFixed(2) : '0.00';
   ringFg.style.strokeDashoffset = totalCH ? (326.7 - (cgpa / 4.0) * 326.7) : 326.7;
-
-  if (cgpa > 3.5 && totalCH > 0 && !hasCelebrated) {
-    triggerConfetti();
-    hasCelebrated = true;
-  } else if (cgpa <= 3.5) {
-    hasCelebrated = false;
-  }
 }
 
 // ── DYNAMIC PICTURE TABLE GENERATOR ──
@@ -545,6 +569,7 @@ async function exportTranscript(type) {
       <div style="flex:1;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;padding:1.5rem;text-align:center">
         <div style="font-size:.7rem;letter-spacing:.05em;text-transform:uppercase;color:#6B7280;margin-bottom:.5rem;font-weight:700">Cumulative GPA</div>
         <div style="font-family:'Merriweather',serif;font-size:3rem;font-weight:900;color:#0F172A">${totalCH ? cgpa.toFixed(2) : '—'}</div>
+        <div style="font-size:.9rem;color:#A51C30;font-weight:800;margin-top:.4rem;text-transform:uppercase;letter-spacing:.05em;">${totalCH ? getLatinHonors(cgpa) : ''}</div>
       </div>
       <div style="flex:1;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;padding:1.5rem;text-align:center">
         <div style="font-size:.7rem;letter-spacing:.05em;text-transform:uppercase;color:#6B7280;margin-bottom:.5rem;font-weight:700">Overall Grade</div>
@@ -585,7 +610,7 @@ async function exportTranscript(type) {
 // ── CONFETTI ──
 function triggerConfetti() {
   if (typeof confetti === 'function') {
-    var duration = 4 * 1000;
+    var duration = 2 * 1000;
     var end = Date.now() + duration;
 
     (function frame() {
