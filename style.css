@@ -267,9 +267,58 @@ body {
   padding-bottom: .5rem;
 }
 @media (max-width: 768px) {
-  .subjects-header, .subject-row {
-    grid-template-columns: 1fr 80px 120px 70px 80px 34px !important;
-    gap: .5rem !important;
+  .subjects-header {
+    display: none;
+  }
+  .subject-row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 0.75rem !important;
+    padding: 1.25rem 1rem !important;
+    background: var(--surface);
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius2);
+    position: relative;
+    box-shadow: var(--shadow-sm);
+  }
+  .subject-row .inp-name {
+    width: calc(100% - 45px);
+    order: 1;
+  }
+  .subject-row .del-btn {
+    position: absolute;
+    top: 1.25rem;
+    right: 1rem;
+    order: 2;
+  }
+  .subject-row .inp-marks {
+    width: calc(35% - 0.375rem);
+    order: 3;
+  }
+  .subject-row .ch-control {
+    width: calc(65% - 0.375rem);
+    order: 4;
+  }
+  .subject-row .grade-badge {
+    width: calc(50% - 0.375rem);
+    order: 5;
+  }
+  .subject-row .qp-cell {
+    width: calc(50% - 0.375rem);
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    order: 6;
+  }
+  .subject-row .qp-cell::before {
+    content: "QP: ";
+    font-size: 0.75rem;
+    color: var(--text3);
+    margin-right: 4px;
+    font-weight: 700;
   }
 }
 .sh-label {
@@ -696,8 +745,17 @@ input[type="number"]::-webkit-inner-spin-button { opacity: .5; }
   .tabs-wrap { flex-direction: column; align-items: stretch; }
   .btn-add-sem { width: 100%; justify-content: center; }
   
-  .sem-card { padding: 1.5rem; }
-  .subjects-wrap { overflow-x: auto; padding-bottom: 1rem; }
-  .subjects-list, .subjects-header { min-width: 650px; }
+  .sem-card { padding: 1.25rem; }
+  .sem-card-title { width: 100%; }
+  .sem-card-title input { width: 100%; font-size: 1.3rem; }
+  .sem-header-actions { width: 100%; justify-content: space-between; }
+  .sem-header-actions .btn { flex: 1; justify-content: center; }
+  
+  .subjects-wrap { overflow-x: visible; padding-bottom: 0; }
+  .subjects-list, .subjects-header { min-width: 0; }
   .modal-box { padding: 1.5rem; }
+  
+  .sem-result { flex-direction: column; gap: 0.75rem; }
+  .sr-pill { width: 100%; padding: 1rem; }
+  .student-details-card { flex-direction: column; padding: 1.5rem; gap: 1rem; }
 }

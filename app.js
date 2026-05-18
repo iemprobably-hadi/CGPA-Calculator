@@ -584,18 +584,32 @@ async function exportTranscript(type) {
 
 // ── CONFETTI ──
 function triggerConfetti() {
-  const colors = ['#A51C30', '#E6B31E', '#0F172A', '#059669'];
-  for (let i = 0; i < 100; i++) {
-    const el = document.createElement('div');
-    el.className = 'confetti-particle';
-    el.style.left = Math.random() * 100 + 'vw';
-    el.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-    el.style.width = Math.random() * 8 + 6 + 'px';
-    el.style.height = el.style.width;
-    el.style.animationDuration = (Math.random() * 3 + 2) + 's';
-    el.style.animationDelay = Math.random() * 0.5 + 's';
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 6000);
+  if (typeof confetti === 'function') {
+    var duration = 4 * 1000;
+    var end = Date.now() + duration;
+
+    (function frame() {
+      confetti({
+        particleCount: 7,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0 },
+        colors: ['#A51C30', '#E6B31E', '#0F172A', '#059669'],
+        zIndex: 9999
+      });
+      confetti({
+        particleCount: 7,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1 },
+        colors: ['#A51C30', '#E6B31E', '#0F172A', '#059669'],
+        zIndex: 9999
+      });
+
+      if (Date.now() < end) {
+        requestAnimationFrame(frame);
+      }
+    }());
   }
 }
 
