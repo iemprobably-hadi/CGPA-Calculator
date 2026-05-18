@@ -1,0 +1,14 @@
+{
+  "name": "gradex-cgpa-calculator",
+  "version": "1.0.0",
+  "description": "GradeX — CGPA Calculator for students. QP/CH system, Max GPA 4.0",
+  "private": true,
+  "scripts": {
+    "dev": "npx serve .",
+    "build": "echo 'Static site, no build needed'",
+    "start": "npx serve ."
+  },
+  "keywords": ["cgpa", "calculator", "gpa", "students"],
+  "author": "GradeX",
+  "license": "MIT"
+}
