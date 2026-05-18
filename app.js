@@ -105,6 +105,20 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('calculateFinalBtn').addEventListener('click', () => {
+    let hasInvalid = false;
+    semData.forEach(sem => sem.subs.forEach(s => {
+      const ch = parseFloat(s.ch);
+      const maxMarks = ch ? ch * 20 : 0;
+      if (s.marks && (parseFloat(s.marks) > maxMarks || parseFloat(s.marks) < 0)) {
+        hasInvalid = true;
+      }
+    }));
+
+    if (hasInvalid) {
+      showToast('Error: Please fix the invalid marks (highlighted in red) before calculating.');
+      return;
+    }
+
     const panel = document.getElementById('overallPanel');
     panel.classList.remove('hidden');
     panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -247,16 +261,29 @@ function buildSubjectRow(semId, sub, idx) {
     if (!sem) return;
     const currentSub = sem.subs.find(s => s.id === sub.id);
 
-    const nPct = computePercentage(currentSub.marks, currentSub.ch);
-    const nQP = computeQP(currentSub.marks, currentSub.ch);
-    const nGPA = (currentSub.marks && !isNaN(parseFloat(currentSub.marks))) ? pctToGPA(nPct) : null;
+    const maxMarks = currentSub.ch ? parseFloat(currentSub.ch) * 20 : 0;
+    const isInvalid = currentSub.marks && (parseFloat(currentSub.marks) > maxMarks || parseFloat(currentSub.marks) < 0);
+
+    const nPct = isInvalid ? 0 : computePercentage(currentSub.marks, currentSub.ch);
+    const nQP = isInvalid ? 0 : computeQP(currentSub.marks, currentSub.ch);
+    const nGPA = (!isInvalid && currentSub.marks && !isNaN(parseFloat(currentSub.marks))) ? pctToGPA(nPct) : null;
     const nGrade = nGPA !== null ? gradeLabel(nGPA) : null;
 
     const badge = row.querySelector('.grade-badge');
-    badge.className = 'grade-badge ' + (nGrade ? badgeClass(nGPA) : 'badge-empty');
-    badge.textContent = nGrade ? nGrade.letter : '—';
+    badge.className = 'grade-badge ' + (nGrade ? badgeClass(nGPA) : (isInvalid ? 'badge-f' : 'badge-empty'));
+    badge.textContent = nGrade ? nGrade.letter : (isInvalid ? 'ERR' : '—');
 
-    row.querySelector('.qp-cell').textContent = (currentSub.marks && currentSub.ch) ? nQP.toFixed(2) : '—';
+    row.querySelector('.qp-cell').textContent = (!isInvalid && currentSub.marks && currentSub.ch) ? nQP.toFixed(2) : (isInvalid ? 'ERR' : '—');
+
+    // Restriction Validation
+    const marksEl = row.querySelector('.inp-marks');
+    if (isInvalid) {
+      marksEl.classList.add('invalid-marks');
+      marksEl.title = `Max marks allowed for ${currentSub.ch} CH is ${maxMarks}`;
+    } else {
+      marksEl.classList.remove('invalid-marks');
+      marksEl.title = "Enter Raw Marks Obtained";
+    }
   };
 
   const notifyChange = () => {
@@ -267,7 +294,13 @@ function buildSubjectRow(semId, sub, idx) {
   };
 
   row.querySelector('.inp-name').addEventListener('input', e => { sub.name = e.target.value; saveData(); });
-  row.querySelector('.inp-marks').addEventListener('input', e => { sub.marks = e.target.value; notifyChange(); });
+  
+  const inpMarks = row.querySelector('.inp-marks');
+  inpMarks.addEventListener('input', e => { sub.marks = e.target.value; notifyChange(); });
+  inpMarks.addEventListener('wheel', function() { this.blur(); }); // Prevent mouse wheel from changing value
+  inpMarks.addEventListener('keydown', e => {
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault(); // Prevent arrow keys from changing value
+  });
   
   // Segmented Control Logic
   const segBtns = row.querySelectorAll('.seg-btn');
@@ -282,6 +315,7 @@ function buildSubjectRow(semId, sub, idx) {
 
   row.querySelector('.del-btn').addEventListener('click', () => { deleteSubject(semId, sub.id); });
 
+  updateSelfDOM();
   return row;
 }
 
@@ -317,7 +351,9 @@ function updateSemStats(semId) {
   let totCH = 0, totQP = 0;
   sem.subs.forEach(s => {
     const ch = parseFloat(s.ch);
-    if (!isNaN(ch) && s.marks) {
+    const maxMarks = ch ? ch * 20 : 0;
+    const isInvalid = s.marks && (parseFloat(s.marks) > maxMarks || parseFloat(s.marks) < 0);
+    if (!isNaN(ch) && s.marks && !isInvalid) {
       totCH += ch;
       totQP += computeQP(s.marks, s.ch);
     }
@@ -341,7 +377,9 @@ function updateOverall() {
     let sCH = 0, sQP = 0;
     sem.subs.forEach(s => {
       const ch = parseFloat(s.ch);
-      if (!isNaN(ch) && s.marks) {
+      const maxMarks = ch ? ch * 20 : 0;
+      const isInvalid = s.marks && (parseFloat(s.marks) > maxMarks || parseFloat(s.marks) < 0);
+      if (!isNaN(ch) && s.marks && !isInvalid) {
         sCH += ch;
         sQP += computeQP(s.marks, s.ch);
       }
@@ -451,7 +489,9 @@ async function exportTranscript(type) {
   semData.forEach(sem => {
     sem.subs.forEach(s => {
       const ch = parseFloat(s.ch);
-      if (!isNaN(ch) && s.marks) { totalCH += ch; totalQP += computeQP(s.marks, s.ch); }
+      const maxMarks = ch ? ch * 20 : 0;
+      const isInvalid = s.marks && (parseFloat(s.marks) > maxMarks || parseFloat(s.marks) < 0);
+      if (!isNaN(ch) && s.marks && !isInvalid) { totalCH += ch; totalQP += computeQP(s.marks, s.ch); }
     });
   });
   const cgpa = totalCH ? (totalQP / totalCH) : 0;
