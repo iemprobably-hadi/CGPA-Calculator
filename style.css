@@ -742,9 +742,14 @@ input[type="number"]::-webkit-inner-spin-button { opacity: .5; }
 
 @media (max-width: 768px) {
   .hero-title { font-size: 2.8rem; }
-  .cgpa-display { flex-direction: column; align-items: stretch; text-align: center; }
+  .cgpa-display { flex-direction: column; align-items: center; text-align: center; gap: 2rem; }
+  .cgpa-ring-wrap { align-self: center; }
+  .cgpa-stats { width: 100%; }
+  
   .tabs-wrap { flex-direction: column; align-items: stretch; }
   .btn-add-sem { width: 100%; justify-content: center; }
+  
+  #calculateFinalBtn { width: 100%; font-size: 1.1rem !important; }
   
   .sem-card { padding: 1.25rem; }
   .sem-card-title { width: 100%; }
